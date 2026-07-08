@@ -1,0 +1,1272 @@
+{
+  "info": {
+    "_postman_id": "roova-backend-auth-collection",
+    "name": "Roova Backend — Auth API",
+    "description": "Agency, Admin, and Investor auth endpoints (session-cookie based). Set the `baseUrl` collection variable to point at your running server (defaults to http://localhost:3000). Every request has saved example responses covering the success case and every error case the endpoint can return.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Agency",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Adunni Properties\",\n  \"email\": \"hello@adunniproperties.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/agency/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "agency", "register"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created — account created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Adunni Properties\",\n  \"email\": \"hello@adunniproperties.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10000o8ab1c2d3e4\",\n  \"name\": \"Adunni Properties\",\n  \"email\": \"hello@adunniproperties.com\",\n  \"tier\": \"Silver tier\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-07-08T10:15:00.000Z\",\n  \"updatedAt\": \"2026-07-08T10:15:00.000Z\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"A\",\n  \"email\": \"not-an-email\",\n  \"password\": \"short\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "register"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"name must be longer than or equal to 2 characters\",\n    \"email must be an email\",\n    \"password must be longer than or equal to 8 characters\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "409 Conflict — email already registered",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Adunni Properties\",\n  \"email\": \"hello@adunniproperties.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "register"]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"An account with this email already exists\",\n  \"error\": \"Conflict\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hello@adunniproperties.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/agency/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "agency", "login"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — logged in, session cookie set",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"hello@adunniproperties.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+                { "key": "Set-Cookie", "value": "connect.sid=s%3A...; Path=/; HttpOnly; SameSite=Lax" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10000o8ab1c2d3e4\",\n  \"name\": \"Adunni Properties\",\n  \"email\": \"hello@adunniproperties.com\",\n  \"tier\": \"Silver tier\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-07-08T10:15:00.000Z\",\n  \"updatedAt\": \"2026-07-08T10:15:00.000Z\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"not-an-email\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "login"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"email must be an email\",\n    \"password must be a string\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — invalid credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"hello@adunniproperties.com\",\n  \"password\": \"WrongPassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Invalid email or password\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/agency/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "agency", "logout"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — logged out",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "logout"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Logged out.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — no active session",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "logout"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Not authenticated\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get current agency (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/agency/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "agency", "me"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — current profile",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "me"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10000o8ab1c2d3e4\",\n  \"name\": \"Adunni Properties\",\n  \"email\": \"hello@adunniproperties.com\",\n  \"tier\": \"Silver tier\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-07-08T10:15:00.000Z\",\n  \"updatedAt\": \"2026-07-08T10:15:00.000Z\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — not logged in",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Not authenticated\",\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — account deleted after session issued",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Account no longer exists\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hello@adunniproperties.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/agency/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "agency", "forgot-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — account exists (reset link sent)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"hello@adunniproperties.com\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "forgot-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"If an account exists for this email, a reset link has been sent.\"\n}"
+            },
+            {
+              "name": "200 OK — account does not exist (same response, by design)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"nobody@example.com\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "forgot-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"If an account exists for this email, a reset link has been sent.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — invalid email format",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"not-an-email\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "forgot-password"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"email must be an email\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"paste-the-raw-token-from-the-server-log-here\",\n  \"password\": \"NewSuperSecret123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/agency/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "agency", "reset-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — password updated",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"a1b2c3...\",\n  \"password\": \"NewSuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "reset-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Password updated successfully.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"token\": \"\",\n  \"password\": \"short\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "reset-password"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"token should not be empty\",\n    \"password must be longer than or equal to 8 characters\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — invalid or expired token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"expired-or-wrong-token\",\n  \"password\": \"NewSuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/agency/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "agency", "reset-password"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"This reset link is invalid or has expired\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@roova.com\",\n  \"password\": \"ChangeMe123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin", "login"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — logged in, session cookie set",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@roova.com\",\n  \"password\": \"ChangeMe123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+                { "key": "Set-Cookie", "value": "connect.sid=s%3A...; Path=/; HttpOnly; SameSite=Lax" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10001o8ab1c2d3e5\",\n  \"name\": \"Roova Admin\",\n  \"email\": \"admin@roova.com\",\n  \"createdAt\": \"2026-07-08T09:00:00.000Z\",\n  \"updatedAt\": \"2026-07-08T09:00:00.000Z\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"not-an-email\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "login"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"email must be an email\",\n    \"password must be a string\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — invalid credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@roova.com\",\n  \"password\": \"WrongPassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Invalid email or password\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin", "logout"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — logged out",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "logout"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Logged out.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — no active session",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "logout"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Not authenticated\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get current admin (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin", "me"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — current profile",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "me"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10001o8ab1c2d3e5\",\n  \"name\": \"Roova Admin\",\n  \"email\": \"admin@roova.com\",\n  \"createdAt\": \"2026-07-08T09:00:00.000Z\",\n  \"updatedAt\": \"2026-07-08T09:00:00.000Z\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — not logged in",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Not authenticated\",\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — account deleted after session issued",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Account no longer exists\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@roova.com\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin", "forgot-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — account exists (reset link sent)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@roova.com\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "forgot-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"If an account exists for this email, a reset link has been sent.\"\n}"
+            },
+            {
+              "name": "200 OK — account does not exist (same response, by design)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"nobody@example.com\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "forgot-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"If an account exists for this email, a reset link has been sent.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — invalid email format",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"not-an-email\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "forgot-password"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"email must be an email\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"paste-the-raw-token-from-the-server-log-here\",\n  \"password\": \"NewChangeMe123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin", "reset-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — password updated",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"a1b2c3...\",\n  \"password\": \"NewChangeMe123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "reset-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Password updated successfully.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"token\": \"\",\n  \"password\": \"short\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "reset-password"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"token should not be empty\",\n    \"password must be longer than or equal to 8 characters\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — invalid or expired token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"expired-or-wrong-token\",\n  \"password\": \"NewChangeMe123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/admin/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "admin", "reset-password"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"This reset link is invalid or has expired\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Investor",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chidinma Okafor\",\n  \"email\": \"chidinma.okafor@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/investor/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "investor", "register"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created — account created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Chidinma Okafor\",\n  \"email\": \"chidinma.okafor@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "register"]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10002o8ab1c2d3e6\",\n  \"name\": \"Chidinma Okafor\",\n  \"email\": \"chidinma.okafor@example.com\",\n  \"kycStatus\": \"PENDING\",\n  \"createdAt\": \"2026-07-08T10:20:00.000Z\",\n  \"updatedAt\": \"2026-07-08T10:20:00.000Z\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"A\",\n  \"email\": \"not-an-email\",\n  \"password\": \"short\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "register"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"name must be longer than or equal to 2 characters\",\n    \"email must be an email\",\n    \"password must be longer than or equal to 8 characters\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "409 Conflict — email already registered",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Chidinma Okafor\",\n  \"email\": \"chidinma.okafor@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "register"]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 409,\n  \"message\": \"An account with this email already exists\",\n  \"error\": \"Conflict\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"chidinma.okafor@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/investor/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "investor", "login"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — logged in, session cookie set",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"chidinma.okafor@example.com\",\n  \"password\": \"SuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                { "key": "Content-Type", "value": "application/json; charset=utf-8" },
+                { "key": "Set-Cookie", "value": "connect.sid=s%3A...; Path=/; HttpOnly; SameSite=Lax" }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10002o8ab1c2d3e6\",\n  \"name\": \"Chidinma Okafor\",\n  \"email\": \"chidinma.okafor@example.com\",\n  \"kycStatus\": \"PENDING\",\n  \"createdAt\": \"2026-07-08T10:20:00.000Z\",\n  \"updatedAt\": \"2026-07-08T10:20:00.000Z\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"not-an-email\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "login"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"email must be an email\",\n    \"password must be a string\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — invalid credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"chidinma.okafor@example.com\",\n  \"password\": \"WrongPassword\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "login"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Invalid email or password\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/investor/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "investor", "logout"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — logged out",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "logout"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Logged out.\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — no active session",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "logout"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Not authenticated\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get current investor (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/investor/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "investor", "me"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — current profile",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "me"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"id\": \"cm3x9k2z10002o8ab1c2d3e6\",\n  \"name\": \"Chidinma Okafor\",\n  \"email\": \"chidinma.okafor@example.com\",\n  \"kycStatus\": \"PENDING\",\n  \"createdAt\": \"2026-07-08T10:20:00.000Z\",\n  \"updatedAt\": \"2026-07-08T10:20:00.000Z\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — not logged in",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Not authenticated\",\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — account deleted after session issued",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/me",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "me"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"Account no longer exists\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Forgot password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"chidinma.okafor@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/investor/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "investor", "forgot-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — account exists (reset link sent)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"chidinma.okafor@example.com\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "forgot-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"If an account exists for this email, a reset link has been sent.\"\n}"
+            },
+            {
+              "name": "200 OK — account does not exist (same response, by design)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"nobody@example.com\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "forgot-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"If an account exists for this email, a reset link has been sent.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — invalid email format",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"email\": \"not-an-email\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/forgot-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "forgot-password"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"email must be an email\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"paste-the-raw-token-from-the-server-log-here\",\n  \"password\": \"NewSuperSecret123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/investor/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "investor", "reset-password"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK — password updated",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"a1b2c3...\",\n  \"password\": \"NewSuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "reset-password"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"message\": \"Password updated successfully.\"\n}"
+            },
+            {
+              "name": "400 Bad Request — validation error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"token\": \"\",\n  \"password\": \"short\"\n}" },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "reset-password"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 400,\n  \"message\": [\n    \"token should not be empty\",\n    \"password must be longer than or equal to 8 characters\"\n  ],\n  \"error\": \"Bad Request\"\n}"
+            },
+            {
+              "name": "401 Unauthorized — invalid or expired token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"token\": \"expired-or-wrong-token\",\n  \"password\": \"NewSuperSecret123!\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/investor/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "investor", "reset-password"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }],
+              "cookie": [],
+              "body": "{\n  \"statusCode\": 401,\n  \"message\": \"This reset link is invalid or has expired\",\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
