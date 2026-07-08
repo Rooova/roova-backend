@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import * as session from 'express-session';
-import * as connectPgSimple from 'connect-pg-simple';
+import session from 'express-session';
+import connectPgSimple from 'connect-pg-simple';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -49,4 +49,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+void bootstrap();

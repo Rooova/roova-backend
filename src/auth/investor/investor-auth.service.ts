@@ -20,13 +20,14 @@ const RESET_URL_BASE =
   'http://localhost:3000/reset-password';
 
 function toPublicInvestor(investor: Investor) {
-  const {
-    passwordHash,
-    passwordResetTokenHash,
-    passwordResetExpiresAt,
-    ...rest
-  } = investor;
-  return rest;
+  return {
+    id: investor.id,
+    name: investor.name,
+    email: investor.email,
+    kycStatus: investor.kycStatus,
+    createdAt: investor.createdAt,
+    updatedAt: investor.updatedAt,
+  };
 }
 
 @Injectable()

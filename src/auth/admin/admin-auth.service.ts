@@ -15,13 +15,13 @@ const RESET_URL_BASE =
   'http://admin.localhost:3000/reset-password';
 
 function toPublicAdmin(admin: Admin) {
-  const {
-    passwordHash,
-    passwordResetTokenHash,
-    passwordResetExpiresAt,
-    ...rest
-  } = admin;
-  return rest;
+  return {
+    id: admin.id,
+    name: admin.name,
+    email: admin.email,
+    createdAt: admin.createdAt,
+    updatedAt: admin.updatedAt,
+  };
 }
 
 @Injectable()
