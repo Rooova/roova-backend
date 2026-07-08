@@ -20,13 +20,15 @@ const RESET_URL_BASE =
   'http://agency.localhost:3000/reset-password';
 
 function toPublicAgency(agency: Agency) {
-  const {
-    passwordHash,
-    passwordResetTokenHash,
-    passwordResetExpiresAt,
-    ...rest
-  } = agency;
-  return rest;
+  return {
+    id: agency.id,
+    name: agency.name,
+    email: agency.email,
+    tier: agency.tier,
+    status: agency.status,
+    createdAt: agency.createdAt,
+    updatedAt: agency.updatedAt,
+  };
 }
 
 @Injectable()
