@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type InvestmentDocument = HydratedDocument<Investment>;
 
@@ -8,10 +8,20 @@ export type InvestmentStatus =
 
 @Schema({ timestamps: true })
 export class Investment {
-  @Prop({ type: Types.ObjectId, ref: 'Investor', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Investor',
+    required: true,
+    index: true,
+  })
   investorId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Property', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Property',
+    required: true,
+    index: true,
+  })
   propertyId: Types.ObjectId;
 
   @Prop({ required: true, min: 1 })

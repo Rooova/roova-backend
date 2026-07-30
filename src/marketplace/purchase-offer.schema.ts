@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type PurchaseOfferDocument = HydratedDocument<PurchaseOffer>;
 
@@ -11,14 +11,19 @@ export type OfferPaymentPlan = 'FULL_PAYMENT' | 'INSTALLMENT';
 @Schema({ timestamps: true })
 export class PurchaseOffer {
   @Prop({
-    type: Types.ObjectId,
+    type: MongooseSchema.Types.ObjectId,
     ref: 'MarketplaceListing',
     required: true,
     index: true,
   })
   listingId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Investor', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Investor',
+    required: true,
+    index: true,
+  })
   buyerId: Types.ObjectId;
 
   @Prop({ enum: ['FULL_PAYMENT', 'INSTALLMENT'], required: true })

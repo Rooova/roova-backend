@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type MarketplaceListingDocument = HydratedDocument<MarketplaceListing>;
 
@@ -10,7 +10,12 @@ export type PaymentPlanType = 'FULL_PAYMENT' | 'INSTALLMENT' | 'BOTH';
 
 @Schema({ timestamps: true })
 export class MarketplaceListing {
-  @Prop({ type: Types.ObjectId, ref: 'Agency', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Agency',
+    required: true,
+    index: true,
+  })
   agencyId: Types.ObjectId;
 
   @Prop({ required: true, trim: true })
