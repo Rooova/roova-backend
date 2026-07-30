@@ -7,10 +7,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Investment, InvestmentDocument } from './investment.schema';
 import { Property, PropertyDocument } from '../property/property.schema';
-import {
-  closePropertyIfExpired,
-  isFundingExpired,
-} from '../property/property.utils';
+import { PropertyExpiryService } from '../property/property-expiry.service';
+import { WalletService } from '../payments/wallet.service';
+import { nairaToKobo } from '../payments/money.util';
+import { isDuplicateKeyError } from '../common/utils/mongo.util';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 
 function toInvestmentSummary(investment: InvestmentDocument) {
@@ -32,26 +32,15 @@ export class InvestmentService {
     private readonly investmentModel: Model<InvestmentDocument>,
     @InjectModel(Property.name)
     private readonly propertyModel: Model<PropertyDocument>,
+    private readonly propertyExpiry: PropertyExpiryService,
+    private readonly walletService: WalletService,
   ) {}
 
   async create(investorId: string, dto: CreateInvestmentDto) {
-    let property = await this.propertyModel.findById(dto.propertyId);
+    const property = await this.propertyExpiry.getCurrent(dto.propertyId);
     if (!property) {
       throw new NotFoundException('Property not found');
     }
-
-    if (isFundingExpired(property)) {
-      await closePropertyIfExpired(
-        this.propertyModel,
-        this.investmentModel,
-        property._id,
-      );
-      property = await this.propertyModel.findById(dto.propertyId);
-      if (!property) {
-        throw new NotFoundException('Property not found');
-      }
-    }
-
     if (property.status !== 'LIVE') {
       throw new ConflictException(
         'This property is not currently accepting investments',
@@ -59,7 +48,38 @@ export class InvestmentService {
     }
 
     const totalAmount = dto.shares * property.sharePrice;
+    const totalAmountKobo = nairaToKobo(totalAmount);
     const investorObjectId = new Types.ObjectId(investorId);
+
+    let investment: InvestmentDocument;
+    try {
+      investment = await this.investmentModel.create({
+        investorId: investorObjectId,
+        propertyId: property._id,
+        shares: dto.shares,
+        pricePerShare: property.sharePrice,
+        totalAmount,
+        status: 'PENDING',
+        clientReference: dto.clientReference,
+      });
+    } catch (error) {
+      if (isDuplicateKeyError(error)) {
+        throw new ConflictException('Duplicate investment request');
+      }
+      throw error;
+    }
+
+    try {
+      await this.walletService.escrow(
+        investorId,
+        totalAmountKobo,
+        investment._id,
+      );
+    } catch (error) {
+      investment.status = 'CANCELLED';
+      await investment.save();
+      throw error;
+    }
 
     const updatedProperty = await this.propertyModel.findOneAndUpdate(
       {
@@ -83,6 +103,13 @@ export class InvestmentService {
     );
 
     if (!updatedProperty) {
+      await this.walletService.refundEscrow(
+        investorId,
+        totalAmountKobo,
+        investment._id,
+      );
+      investment.status = 'CANCELLED';
+      await investment.save();
       throw new ConflictException('Not enough shares remaining');
     }
 
@@ -97,14 +124,8 @@ export class InvestmentService {
       );
     }
 
-    const investment = await this.investmentModel.create({
-      investorId: investorObjectId,
-      propertyId: property._id,
-      shares: dto.shares,
-      pricePerShare: property.sharePrice,
-      totalAmount,
-      status: 'CONFIRMED',
-    });
+    investment.status = 'CONFIRMED';
+    await investment.save();
 
     return toInvestmentSummary(investment);
   }

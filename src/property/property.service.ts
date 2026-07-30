@@ -7,12 +7,9 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Property, PropertyDocument, PropertyStatus } from './property.schema';
-import {
-  Investment,
-  InvestmentDocument,
-} from '../investment/investment.schema';
+import { Investment, InvestmentDocument } from '../investment/investment.schema';
 import { Investor, InvestorDocument } from '../auth/investor/investor.schema';
-import { closePropertyIfExpired, isFundingExpired } from './property.utils';
+import { PropertyExpiryService } from './property-expiry.service';
 import { SessionRole } from '../common/guards/session-role.guard';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
@@ -62,6 +59,7 @@ export class PropertyService {
     private readonly investmentModel: Model<InvestmentDocument>,
     @InjectModel(Investor.name)
     private readonly investorModel: Model<InvestorDocument>,
+    private readonly propertyExpiry: PropertyExpiryService,
   ) {}
 
   async create(agencyId: string, dto: CreatePropertyDto) {
@@ -121,7 +119,7 @@ export class PropertyService {
   }
 
   async findPublicList() {
-    await this.closeExpiredProperties();
+    await this.sweepExpiredLiveProperties();
     const properties = await this.propertyModel
       .find({ status: { $in: ['LIVE', 'FUNDED'] } })
       .sort({ createdAt: -1 });
@@ -129,19 +127,7 @@ export class PropertyService {
   }
 
   async findPublicById(id: string) {
-    let property = await this.propertyModel.findById(id);
-    if (!property) {
-      throw new NotFoundException('Property not found');
-    }
-    if (isFundingExpired(property)) {
-      await closePropertyIfExpired(
-        this.propertyModel,
-        this.investmentModel,
-        property._id,
-      );
-      property = await this.propertyModel.findById(id);
-    }
-
+    const property = await this.propertyExpiry.getCurrent(id);
     if (!property || !['LIVE', 'FUNDED'].includes(property.status)) {
       throw new NotFoundException('Property not found');
     }
@@ -149,27 +135,17 @@ export class PropertyService {
   }
 
   async findFull(session: { id: string; role: SessionRole }, id: string) {
-    let property = await this.propertyModel.findById(id);
-    if (!property) {
+    const owner = await this.propertyModel.findById(id);
+    if (!owner) {
       throw new NotFoundException('Property not found');
     }
-    if (
-      session.role === 'AGENCY' &&
-      property.agencyId.toString() !== session.id
-    ) {
+    if (session.role === 'AGENCY' && owner.agencyId.toString() !== session.id) {
       throw new ForbiddenException('Not your property');
     }
 
-    if (isFundingExpired(property)) {
-      await closePropertyIfExpired(
-        this.propertyModel,
-        this.investmentModel,
-        property._id,
-      );
-      property = await this.propertyModel.findById(id);
-      if (!property) {
-        throw new NotFoundException('Property not found');
-      }
+    const property = await this.propertyExpiry.getCurrent(id);
+    if (!property) {
+      throw new NotFoundException('Property not found');
     }
 
     const investments = await this.investmentModel
@@ -202,7 +178,7 @@ export class PropertyService {
   }
 
   async findAllForAdmin(status?: PropertyStatus) {
-    await this.closeExpiredProperties();
+    await this.sweepExpiredLiveProperties();
     const filter = status ? { status } : {};
     const properties = await this.propertyModel
       .find(filter)
@@ -263,17 +239,13 @@ export class PropertyService {
     return property;
   }
 
-  private async closeExpiredProperties() {
+  private async sweepExpiredLiveProperties() {
     const expired = await this.propertyModel.find(
       { status: 'LIVE', fundingDeadline: { $lte: new Date() } },
       { _id: 1 },
     );
     for (const { _id } of expired) {
-      await closePropertyIfExpired(
-        this.propertyModel,
-        this.investmentModel,
-        _id,
-      );
+      await this.propertyExpiry.getCurrent(_id);
     }
   }
 }

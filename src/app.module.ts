@@ -10,6 +10,7 @@ import { InvestorAuthModule } from './auth/investor/investor-auth.module';
 import { PropertyModule } from './property/property.module';
 import { InvestmentModule } from './investment/investment.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { MarketplaceModule } from './marketplace/marketplace.module';
     PropertyModule,
     InvestmentModule,
     MarketplaceModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

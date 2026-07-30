@@ -14,16 +14,7 @@ import {
   WalletTransactionType,
 } from './wallet-transaction.schema';
 import { koboToNaira } from './money.util';
-
-const DUPLICATE_KEY_ERROR = 11000;
-
-function isDuplicateKeyError(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    (error as { code?: number }).code === DUPLICATE_KEY_ERROR
-  );
-}
+import { isDuplicateKeyError } from '../common/utils/mongo.util';
 
 function toPublicWallet(wallet: WalletDocument) {
   return {

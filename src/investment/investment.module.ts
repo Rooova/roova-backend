@@ -4,6 +4,8 @@ import { InvestmentController } from './investment.controller';
 import { InvestmentService } from './investment.service';
 import { Investment, InvestmentSchema } from './investment.schema';
 import { Property, PropertySchema } from '../property/property.schema';
+import { PropertyModule } from '../property/property.module';
+import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
   imports: [
@@ -11,6 +13,8 @@ import { Property, PropertySchema } from '../property/property.schema';
       { name: Investment.name, schema: InvestmentSchema },
       { name: Property.name, schema: PropertySchema },
     ]),
+    PropertyModule,
+    PaymentsModule,
   ],
   controllers: [InvestmentController],
   providers: [InvestmentService],

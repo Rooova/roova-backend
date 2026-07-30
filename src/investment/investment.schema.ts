@@ -42,9 +42,19 @@ export class Investment {
   @Prop({ type: Date })
   refundedAt?: Date | null;
 
+  @Prop({ type: String })
+  clientReference?: string | null;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 export const InvestmentSchema = SchemaFactory.createForClass(Investment);
 InvestmentSchema.index({ propertyId: 1, status: 1 });
+InvestmentSchema.index(
+  { investorId: 1, clientReference: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientReference: { $exists: true } },
+  },
+);
