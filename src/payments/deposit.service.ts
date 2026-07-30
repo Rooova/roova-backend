@@ -50,12 +50,13 @@ export class DepositService {
       status: 'PENDING',
     });
 
-    const { authorizationUrl, accessCode } = await this.gateway.initializeTransaction({
-      email: investor.email,
-      amountKobo,
-      reference,
-      callbackUrl: process.env.INVESTOR_WALLET_CALLBACK_URL,
-    });
+    const { authorizationUrl, accessCode } =
+      await this.gateway.initializeTransaction({
+        email: investor.email,
+        amountKobo,
+        reference,
+        callbackUrl: process.env.INVESTOR_WALLET_CALLBACK_URL,
+      });
 
     deposit.paystackAccessCode = accessCode;
     await deposit.save();
@@ -115,7 +116,11 @@ export class DepositService {
     if (verification.status === 'failed') {
       const flipped = await this.depositModel.findOneAndUpdate(
         { reference, status: { $ne: 'SUCCESS' } },
-        { status: 'FAILED', verifiedAt: new Date(), providerMetadata: verification.raw },
+        {
+          status: 'FAILED',
+          verifiedAt: new Date(),
+          providerMetadata: verification.raw,
+        },
         { new: true },
       );
       return toPublicDeposit(flipped ?? deposit);

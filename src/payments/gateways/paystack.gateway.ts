@@ -26,7 +26,9 @@ interface VerifyTransactionResult {
 function secretKey(): string {
   const key = process.env.PAYSTACK_SECRET_KEY;
   if (!key) {
-    throw new InternalServerErrorException('PAYSTACK_SECRET_KEY is not configured');
+    throw new InternalServerErrorException(
+      'PAYSTACK_SECRET_KEY is not configured',
+    );
   }
   return key;
 }
@@ -36,19 +38,22 @@ export class PaystackGateway {
   async initializeTransaction(
     params: InitializeTransactionParams,
   ): Promise<InitializeTransactionResult> {
-    const response = await fetch(`${PAYSTACK_BASE_URL}/transaction/initialize`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${secretKey()}`,
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${PAYSTACK_BASE_URL}/transaction/initialize`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${secretKey()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: params.email,
+          amount: params.amountKobo,
+          reference: params.reference,
+          callback_url: params.callbackUrl,
+        }),
       },
-      body: JSON.stringify({
-        email: params.email,
-        amount: params.amountKobo,
-        reference: params.reference,
-        callback_url: params.callbackUrl,
-      }),
-    });
+    );
 
     const body = (await response.json()) as {
       status: boolean;
@@ -96,7 +101,10 @@ export class PaystackGateway {
     };
   }
 
-  verifySignature(rawBody: Buffer, signatureHeader: string | undefined): boolean {
+  verifySignature(
+    rawBody: Buffer,
+    signatureHeader: string | undefined,
+  ): boolean {
     if (!signatureHeader) return false;
     const computed = crypto
       .createHmac('sha512', secretKey())

@@ -7,7 +7,12 @@ export type DepositStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'MISMATCHED';
 
 @Schema({ timestamps: true })
 export class Deposit {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Investor', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Investor',
+    required: true,
+    index: true,
+  })
   investorId: Types.ObjectId;
 
   @Prop({ required: true, min: 1 })

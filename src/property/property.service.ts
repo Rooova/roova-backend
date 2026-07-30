@@ -7,7 +7,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Property, PropertyDocument, PropertyStatus } from './property.schema';
-import { Investment, InvestmentDocument } from '../investment/investment.schema';
+import {
+  Investment,
+  InvestmentDocument,
+} from '../investment/investment.schema';
 import { Investor, InvestorDocument } from '../auth/investor/investor.schema';
 import { PropertyExpiryService } from './property-expiry.service';
 import { SessionRole } from '../common/guards/session-role.guard';

@@ -50,7 +50,8 @@ export class WalletService {
   private readonly logger = new Logger(WalletService.name);
 
   constructor(
-    @InjectModel(Wallet.name) private readonly walletModel: Model<WalletDocument>,
+    @InjectModel(Wallet.name)
+    private readonly walletModel: Model<WalletDocument>,
     @InjectModel(WalletTransaction.name)
     private readonly walletTransactionModel: Model<WalletTransactionDocument>,
   ) {}
@@ -59,7 +60,13 @@ export class WalletService {
     try {
       return await this.walletModel.findOneAndUpdate(
         { investorId },
-        { $setOnInsert: { investorId, availableBalanceKobo: 0, escrowedBalanceKobo: 0 } },
+        {
+          $setOnInsert: {
+            investorId,
+            availableBalanceKobo: 0,
+            escrowedBalanceKobo: 0,
+          },
+        },
         { upsert: true, new: true },
       );
     } catch (error) {
@@ -176,7 +183,9 @@ export class WalletService {
       this.logger.error(
         `Invariant violation: escrowed balance underflow refunding investment ${investmentId.toString()}`,
       );
-      throw new InternalServerErrorException('Escrow refund invariant violation');
+      throw new InternalServerErrorException(
+        'Escrow refund invariant violation',
+      );
     }
 
     await this.patchLedgerRowBalances(ledgerRow._id, updated);

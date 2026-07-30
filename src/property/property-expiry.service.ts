@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Property, PropertyDocument } from './property.schema';
-import { Investment, InvestmentDocument } from '../investment/investment.schema';
+import {
+  Investment,
+  InvestmentDocument,
+} from '../investment/investment.schema';
 import { WalletService } from '../payments/wallet.service';
 import { nairaToKobo } from '../payments/money.util';
 
@@ -42,7 +45,11 @@ export class PropertyExpiryService {
 
     if (isExpired(property)) {
       await this.propertyModel.updateOne(
-        { _id: property._id, status: 'LIVE', fundingDeadline: { $lte: new Date() } },
+        {
+          _id: property._id,
+          status: 'LIVE',
+          fundingDeadline: { $lte: new Date() },
+        },
         { status: 'CLOSED_UNFUNDED' },
       );
       property = await this.propertyModel.findById(propertyId);
