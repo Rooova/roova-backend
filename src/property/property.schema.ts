@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 export type PropertyDocument = HydratedDocument<Property>;
 
@@ -15,7 +15,12 @@ export type PropertyStatus =
 
 @Schema({ timestamps: true })
 export class Property {
-  @Prop({ type: Types.ObjectId, ref: 'Agency', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'Agency',
+    required: true,
+    index: true,
+  })
   agencyId: Types.ObjectId;
 
   @Prop({ required: true, trim: true })
@@ -56,7 +61,10 @@ export class Property {
   @Prop({ default: 0, min: 0 })
   sharesSold: number;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Investor' }], default: [] })
+  @Prop({
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Investor' }],
+    default: [],
+  })
   investorIds: Types.ObjectId[];
 
   @Prop({ default: 0, min: 0 })
@@ -77,7 +85,7 @@ export class Property {
   @Prop({ type: Date })
   reviewedAt?: Date | null;
 
-  @Prop({ type: Types.ObjectId, ref: 'Admin' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Admin' })
   reviewedBy?: Types.ObjectId | null;
 
   @Prop({ type: String })
