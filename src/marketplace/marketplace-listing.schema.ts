@@ -4,10 +4,7 @@ import { HydratedDocument, Types } from 'mongoose';
 export type MarketplaceListingDocument = HydratedDocument<MarketplaceListing>;
 
 export type MarketplaceListingStatus =
-  | 'ACTIVE'
-  | 'UNDER_OFFER'
-  | 'SOLD'
-  | 'WITHDRAWN';
+  'ACTIVE' | 'UNDER_OFFER' | 'SOLD' | 'WITHDRAWN';
 
 export type PaymentPlanType = 'FULL_PAYMENT' | 'INSTALLMENT' | 'BOTH';
 

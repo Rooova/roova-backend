@@ -4,10 +4,7 @@ import { HydratedDocument, Types } from 'mongoose';
 export type PurchaseOfferDocument = HydratedDocument<PurchaseOffer>;
 
 export type PurchaseOfferStatus =
-  | 'PENDING'
-  | 'ACCEPTED'
-  | 'REJECTED'
-  | 'WITHDRAWN';
+  'PENDING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
 
 export type OfferPaymentPlan = 'FULL_PAYMENT' | 'INSTALLMENT';
 

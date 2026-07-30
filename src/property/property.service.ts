@@ -7,7 +7,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Property, PropertyDocument, PropertyStatus } from './property.schema';
-import { Investment, InvestmentDocument } from '../investment/investment.schema';
+import {
+  Investment,
+  InvestmentDocument,
+} from '../investment/investment.schema';
 import { Investor, InvestorDocument } from '../auth/investor/investor.schema';
 import { closePropertyIfExpired, isFundingExpired } from './property.utils';
 import { SessionRole } from '../common/guards/session-role.guard';
@@ -173,7 +176,9 @@ export class PropertyService {
       .find({ propertyId: property._id })
       .sort({ createdAt: -1 });
     const investorIds = [
-      ...new Set(investments.map((investment) => investment.investorId.toString())),
+      ...new Set(
+        investments.map((investment) => investment.investorId.toString()),
+      ),
     ];
     const investorDocs = await this.investorModel.find(
       { _id: { $in: investorIds } },
@@ -185,7 +190,8 @@ export class PropertyService {
 
     const investors = investments.map((investment) => ({
       id: investment._id.toString(),
-      name: nameById.get(investment.investorId.toString()) ?? 'Unknown investor',
+      name:
+        nameById.get(investment.investorId.toString()) ?? 'Unknown investor',
       shares: investment.shares,
       amount: investment.totalAmount,
       date: investment.createdAt,

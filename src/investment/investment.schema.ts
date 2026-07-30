@@ -4,10 +4,7 @@ import { HydratedDocument, Types } from 'mongoose';
 export type InvestmentDocument = HydratedDocument<Investment>;
 
 export type InvestmentStatus =
-  | 'PENDING'
-  | 'CONFIRMED'
-  | 'REFUNDED'
-  | 'CANCELLED';
+  'PENDING' | 'CONFIRMED' | 'REFUNDED' | 'CANCELLED';
 
 @Schema({ timestamps: true })
 export class Investment {

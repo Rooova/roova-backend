@@ -7,7 +7,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Investment, InvestmentDocument } from './investment.schema';
 import { Property, PropertyDocument } from '../property/property.schema';
-import { closePropertyIfExpired, isFundingExpired } from '../property/property.utils';
+import {
+  closePropertyIfExpired,
+  isFundingExpired,
+} from '../property/property.utils';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 
 function toInvestmentSummary(investment: InvestmentDocument) {
@@ -112,7 +115,9 @@ export class InvestmentService {
       .sort({ createdAt: -1 });
 
     const propertyIds = [
-      ...new Set(investments.map((investment) => investment.propertyId.toString())),
+      ...new Set(
+        investments.map((investment) => investment.propertyId.toString()),
+      ),
     ];
     const properties = await this.propertyModel.find(
       { _id: { $in: propertyIds } },
