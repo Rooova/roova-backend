@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import type { CustomOrigin } from '@nestjs/common/interfaces/external/cors-options.interface';
 import session from 'express-session';
-import connectPgSimple from 'connect-pg-simple';
+import MongoStore from 'connect-mongo';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -29,13 +29,10 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const PgSession = connectPgSimple(session);
-
   app.use(
     session({
-      store: new PgSession({
-        conString: process.env.DATABASE_URL,
-        createTableIfMissing: true,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI ?? 'mongodb://localhost:27017/roova',
       }),
       secret: process.env.SESSION_SECRET ?? 'dev-secret-change-me',
       resave: false,

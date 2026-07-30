@@ -3,11 +3,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
-import type { Agency } from '../../prisma/client';
+import { Agency, AgencyDocument } from './agency.schema';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
@@ -19,9 +20,9 @@ const RESET_URL_BASE =
   process.env.AGENCY_RESET_PASSWORD_URL ??
   'http://agency.localhost:3000/reset-password';
 
-function toPublicAgency(agency: Agency) {
+function toPublicAgency(agency: AgencyDocument) {
   return {
-    id: agency.id,
+    id: agency._id.toString(),
     name: agency.name,
     email: agency.email,
     tier: agency.tier,
@@ -34,28 +35,27 @@ function toPublicAgency(agency: Agency) {
 @Injectable()
 export class AgencyAuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectModel(Agency.name)
+    private readonly agencyModel: Model<AgencyDocument>,
     private readonly mail: MailService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.agency.findUnique({
-      where: { email: dto.email },
-    });
+    const existing = await this.agencyModel.findOne({ email: dto.email });
     if (existing) {
       throw new ConflictException('An account with this email already exists');
     }
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    const agency = await this.prisma.agency.create({
-      data: { name: dto.name, email: dto.email, passwordHash },
+    const agency = await this.agencyModel.create({
+      name: dto.name,
+      email: dto.email,
+      passwordHash,
     });
     return toPublicAgency(agency);
   }
 
   async validateCredentials(dto: LoginDto) {
-    const agency = await this.prisma.agency.findUnique({
-      where: { email: dto.email },
-    });
+    const agency = await this.agencyModel.findOne({ email: dto.email });
     if (!agency || !(await bcrypt.compare(dto.password, agency.passwordHash))) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -63,7 +63,7 @@ export class AgencyAuthService {
   }
 
   async getProfile(id: string) {
-    const agency = await this.prisma.agency.findUnique({ where: { id } });
+    const agency = await this.agencyModel.findById(id);
     if (!agency) {
       throw new UnauthorizedException('Account no longer exists');
     }
@@ -71,9 +71,7 @@ export class AgencyAuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const agency = await this.prisma.agency.findUnique({
-      where: { email: dto.email },
-    });
+    const agency = await this.agencyModel.findOne({ email: dto.email });
 
     // Always respond the same way whether or not the account exists, so this
     // endpoint can't be used to discover which emails are registered.
@@ -83,13 +81,9 @@ export class AgencyAuthService {
         .createHash('sha256')
         .update(rawToken)
         .digest('hex');
-      await this.prisma.agency.update({
-        where: { id: agency.id },
-        data: {
-          passwordResetTokenHash: tokenHash,
-          passwordResetExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
-        },
-      });
+      agency.passwordResetTokenHash = tokenHash;
+      agency.passwordResetExpiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+      await agency.save();
       await this.mail.sendPasswordResetEmail(
         agency.email,
         `${RESET_URL_BASE}?token=${rawToken}`,
@@ -107,8 +101,8 @@ export class AgencyAuthService {
       .createHash('sha256')
       .update(dto.token)
       .digest('hex');
-    const agency = await this.prisma.agency.findUnique({
-      where: { passwordResetTokenHash: tokenHash },
+    const agency = await this.agencyModel.findOne({
+      passwordResetTokenHash: tokenHash,
     });
 
     if (
@@ -121,15 +115,10 @@ export class AgencyAuthService {
       );
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    await this.prisma.agency.update({
-      where: { id: agency.id },
-      data: {
-        passwordHash,
-        passwordResetTokenHash: null,
-        passwordResetExpiresAt: null,
-      },
-    });
+    agency.passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    agency.passwordResetTokenHash = null;
+    agency.passwordResetExpiresAt = null;
+    await agency.save();
 
     return { message: 'Password updated successfully.' };
   }

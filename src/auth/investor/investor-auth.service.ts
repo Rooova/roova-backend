@@ -3,11 +3,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
-import type { Investor } from '../../prisma/client';
+import { Investor, InvestorDocument } from './investor.schema';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
@@ -19,9 +20,9 @@ const RESET_URL_BASE =
   process.env.INVESTOR_RESET_PASSWORD_URL ??
   'http://localhost:3000/reset-password';
 
-function toPublicInvestor(investor: Investor) {
+function toPublicInvestor(investor: InvestorDocument) {
   return {
-    id: investor.id,
+    id: investor._id.toString(),
     name: investor.name,
     email: investor.email,
     kycStatus: investor.kycStatus,
@@ -33,28 +34,27 @@ function toPublicInvestor(investor: Investor) {
 @Injectable()
 export class InvestorAuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectModel(Investor.name)
+    private readonly investorModel: Model<InvestorDocument>,
     private readonly mail: MailService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.investor.findUnique({
-      where: { email: dto.email },
-    });
+    const existing = await this.investorModel.findOne({ email: dto.email });
     if (existing) {
       throw new ConflictException('An account with this email already exists');
     }
     const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    const investor = await this.prisma.investor.create({
-      data: { name: dto.name, email: dto.email, passwordHash },
+    const investor = await this.investorModel.create({
+      name: dto.name,
+      email: dto.email,
+      passwordHash,
     });
     return toPublicInvestor(investor);
   }
 
   async validateCredentials(dto: LoginDto) {
-    const investor = await this.prisma.investor.findUnique({
-      where: { email: dto.email },
-    });
+    const investor = await this.investorModel.findOne({ email: dto.email });
     if (
       !investor ||
       !(await bcrypt.compare(dto.password, investor.passwordHash))
@@ -65,7 +65,7 @@ export class InvestorAuthService {
   }
 
   async getProfile(id: string) {
-    const investor = await this.prisma.investor.findUnique({ where: { id } });
+    const investor = await this.investorModel.findById(id);
     if (!investor) {
       throw new UnauthorizedException('Account no longer exists');
     }
@@ -73,9 +73,7 @@ export class InvestorAuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const investor = await this.prisma.investor.findUnique({
-      where: { email: dto.email },
-    });
+    const investor = await this.investorModel.findOne({ email: dto.email });
 
     if (investor) {
       const rawToken = crypto.randomBytes(32).toString('hex');
@@ -83,13 +81,11 @@ export class InvestorAuthService {
         .createHash('sha256')
         .update(rawToken)
         .digest('hex');
-      await this.prisma.investor.update({
-        where: { id: investor.id },
-        data: {
-          passwordResetTokenHash: tokenHash,
-          passwordResetExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
-        },
-      });
+      investor.passwordResetTokenHash = tokenHash;
+      investor.passwordResetExpiresAt = new Date(
+        Date.now() + RESET_TOKEN_TTL_MS,
+      );
+      await investor.save();
       await this.mail.sendPasswordResetEmail(
         investor.email,
         `${RESET_URL_BASE}?token=${rawToken}`,
@@ -107,8 +103,8 @@ export class InvestorAuthService {
       .createHash('sha256')
       .update(dto.token)
       .digest('hex');
-    const investor = await this.prisma.investor.findUnique({
-      where: { passwordResetTokenHash: tokenHash },
+    const investor = await this.investorModel.findOne({
+      passwordResetTokenHash: tokenHash,
     });
 
     if (
@@ -121,15 +117,10 @@ export class InvestorAuthService {
       );
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    await this.prisma.investor.update({
-      where: { id: investor.id },
-      data: {
-        passwordHash,
-        passwordResetTokenHash: null,
-        passwordResetExpiresAt: null,
-      },
-    });
+    investor.passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    investor.passwordResetTokenHash = null;
+    investor.passwordResetExpiresAt = null;
+    await investor.save();
 
     return { message: 'Password updated successfully.' };
   }

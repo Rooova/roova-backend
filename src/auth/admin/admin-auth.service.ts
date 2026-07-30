@@ -1,9 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
-import type { Admin } from '../../prisma/client';
+import { Admin, AdminDocument } from './admin.schema';
 import { LoginDto } from '../dto/login.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
@@ -14,9 +15,9 @@ const RESET_URL_BASE =
   process.env.ADMIN_RESET_PASSWORD_URL ??
   'http://admin.localhost:3000/reset-password';
 
-function toPublicAdmin(admin: Admin) {
+function toPublicAdmin(admin: AdminDocument) {
   return {
-    id: admin.id,
+    id: admin._id.toString(),
     name: admin.name,
     email: admin.email,
     createdAt: admin.createdAt,
@@ -27,17 +28,15 @@ function toPublicAdmin(admin: Admin) {
 @Injectable()
 export class AdminAuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @InjectModel(Admin.name) private readonly adminModel: Model<AdminDocument>,
     private readonly mail: MailService,
   ) {}
 
   // No self-service registration for admins — accounts are created via the
-  // seed script (prisma/seed.ts), not a public endpoint.
+  // seed script (src/database/seed.ts), not a public endpoint.
 
   async validateCredentials(dto: LoginDto) {
-    const admin = await this.prisma.admin.findUnique({
-      where: { email: dto.email },
-    });
+    const admin = await this.adminModel.findOne({ email: dto.email });
     if (!admin || !(await bcrypt.compare(dto.password, admin.passwordHash))) {
       throw new UnauthorizedException('Invalid email or password');
     }
@@ -45,7 +44,7 @@ export class AdminAuthService {
   }
 
   async getProfile(id: string) {
-    const admin = await this.prisma.admin.findUnique({ where: { id } });
+    const admin = await this.adminModel.findById(id);
     if (!admin) {
       throw new UnauthorizedException('Account no longer exists');
     }
@@ -53,9 +52,7 @@ export class AdminAuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const admin = await this.prisma.admin.findUnique({
-      where: { email: dto.email },
-    });
+    const admin = await this.adminModel.findOne({ email: dto.email });
 
     if (admin) {
       const rawToken = crypto.randomBytes(32).toString('hex');
@@ -63,13 +60,9 @@ export class AdminAuthService {
         .createHash('sha256')
         .update(rawToken)
         .digest('hex');
-      await this.prisma.admin.update({
-        where: { id: admin.id },
-        data: {
-          passwordResetTokenHash: tokenHash,
-          passwordResetExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
-        },
-      });
+      admin.passwordResetTokenHash = tokenHash;
+      admin.passwordResetExpiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+      await admin.save();
       await this.mail.sendPasswordResetEmail(
         admin.email,
         `${RESET_URL_BASE}?token=${rawToken}`,
@@ -87,8 +80,8 @@ export class AdminAuthService {
       .createHash('sha256')
       .update(dto.token)
       .digest('hex');
-    const admin = await this.prisma.admin.findUnique({
-      where: { passwordResetTokenHash: tokenHash },
+    const admin = await this.adminModel.findOne({
+      passwordResetTokenHash: tokenHash,
     });
 
     if (
@@ -101,15 +94,10 @@ export class AdminAuthService {
       );
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
-    await this.prisma.admin.update({
-      where: { id: admin.id },
-      data: {
-        passwordHash,
-        passwordResetTokenHash: null,
-        passwordResetExpiresAt: null,
-      },
-    });
+    admin.passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    admin.passwordResetTokenHash = null;
+    admin.passwordResetExpiresAt = null;
+    await admin.save();
 
     return { message: 'Password updated successfully.' };
   }
