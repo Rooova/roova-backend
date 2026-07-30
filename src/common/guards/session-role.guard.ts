@@ -7,14 +7,19 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 
+export type SessionRole = 'AGENCY' | 'ADMIN' | 'INVESTOR';
+
 export function createSessionAuthGuard(
-  role: 'AGENCY' | 'ADMIN' | 'INVESTOR',
+  role: SessionRole | SessionRole[],
 ): Type<CanActivate> {
+  const allowedRoles = Array.isArray(role) ? role : [role];
+
   @Injectable()
   class SessionAuthGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
       const request = context.switchToHttp().getRequest<Request>();
-      if (request.session?.auth?.role !== role) {
+      const sessionRole = request.session?.auth?.role;
+      if (!sessionRole || !allowedRoles.includes(sessionRole)) {
         throw new UnauthorizedException('Not authenticated');
       }
       return true;
