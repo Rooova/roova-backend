@@ -7,7 +7,7 @@ import {
   Max,
   MinLength,
 } from 'class-validator';
-import { PropertyTier } from '../property.schema';
+import type { PropertyTier } from '../property.schema';
 
 export class CreatePropertyDto {
   @IsString()

@@ -7,7 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Investment, InvestmentDocument } from './investment.schema';
 import { Property, PropertyDocument } from '../property/property.schema';
-import { closePropertyIfExpired } from '../property/property.utils';
+import { closePropertyIfExpired, isFundingExpired } from '../property/property.utils';
 import { CreateInvestmentDto } from './dto/create-investment.dto';
 
 function toInvestmentSummary(investment: InvestmentDocument) {
@@ -37,12 +37,17 @@ export class InvestmentService {
       throw new NotFoundException('Property not found');
     }
 
-    const closed = await closePropertyIfExpired(
-      this.propertyModel,
-      this.investmentModel,
-      property._id,
-    );
-    if (closed) property = closed;
+    if (isFundingExpired(property)) {
+      await closePropertyIfExpired(
+        this.propertyModel,
+        this.investmentModel,
+        property._id,
+      );
+      property = await this.propertyModel.findById(dto.propertyId);
+      if (!property) {
+        throw new NotFoundException('Property not found');
+      }
+    }
 
     if (property.status !== 'LIVE') {
       throw new ConflictException(

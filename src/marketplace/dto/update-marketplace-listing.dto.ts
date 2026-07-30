@@ -10,7 +10,7 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { PaymentPlanType } from '../marketplace-listing.schema';
+import type { PaymentPlanType } from '../marketplace-listing.schema';
 
 export class UpdateMarketplaceListingDto {
   @IsOptional()

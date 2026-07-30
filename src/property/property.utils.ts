@@ -13,23 +13,22 @@ export function isFundingExpired(property: {
   );
 }
 
+/** Returns true if the property was closed (and its investments refunded) as a result of this call. */
 export async function closePropertyIfExpired(
   propertyModel: Model<PropertyDocument>,
   investmentModel: Model<InvestmentDocument>,
   propertyId: Types.ObjectId | string,
-): Promise<PropertyDocument | null> {
+): Promise<boolean> {
   const closed = await propertyModel.findOneAndUpdate(
     { _id: propertyId, status: 'LIVE', fundingDeadline: { $lte: new Date() } },
     { status: 'CLOSED_UNFUNDED' },
-    { new: true },
   );
 
-  if (closed) {
-    await investmentModel.updateMany(
-      { propertyId: closed._id, status: 'CONFIRMED' },
-      { status: 'REFUNDED', refundedAt: new Date() },
-    );
-  }
+  if (!closed) return false;
 
-  return closed;
+  await investmentModel.updateMany(
+    { propertyId: closed._id, status: 'CONFIRMED' },
+    { status: 'REFUNDED', refundedAt: new Date() },
+  );
+  return true;
 }

@@ -12,7 +12,7 @@ import {
 import { PropertyService } from './property.service';
 import { AdminAuthGuard } from '../common/guards/admin-auth.guard';
 import { CurrentSession } from '../common/decorators/current-session.decorator';
-import { PropertyStatus } from './property.schema';
+import type { PropertyStatus } from './property.schema';
 import { RejectPropertyDto } from './dto/reject-property.dto';
 
 @Controller('admin/properties')

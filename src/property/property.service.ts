@@ -9,7 +9,7 @@ import { Model, Types } from 'mongoose';
 import { Property, PropertyDocument, PropertyStatus } from './property.schema';
 import { Investment, InvestmentDocument } from '../investment/investment.schema';
 import { Investor, InvestorDocument } from '../auth/investor/investor.schema';
-import { closePropertyIfExpired } from './property.utils';
+import { closePropertyIfExpired, isFundingExpired } from './property.utils';
 import { SessionRole } from '../common/guards/session-role.guard';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
@@ -130,14 +130,16 @@ export class PropertyService {
     if (!property) {
       throw new NotFoundException('Property not found');
     }
-    const closed = await closePropertyIfExpired(
-      this.propertyModel,
-      this.investmentModel,
-      property._id,
-    );
-    if (closed) property = closed;
+    if (isFundingExpired(property)) {
+      await closePropertyIfExpired(
+        this.propertyModel,
+        this.investmentModel,
+        property._id,
+      );
+      property = await this.propertyModel.findById(id);
+    }
 
-    if (!['LIVE', 'FUNDED'].includes(property.status)) {
+    if (!property || !['LIVE', 'FUNDED'].includes(property.status)) {
       throw new NotFoundException('Property not found');
     }
     return toPropertySummary(property);
@@ -155,12 +157,17 @@ export class PropertyService {
       throw new ForbiddenException('Not your property');
     }
 
-    const closed = await closePropertyIfExpired(
-      this.propertyModel,
-      this.investmentModel,
-      property._id,
-    );
-    if (closed) property = closed;
+    if (isFundingExpired(property)) {
+      await closePropertyIfExpired(
+        this.propertyModel,
+        this.investmentModel,
+        property._id,
+      );
+      property = await this.propertyModel.findById(id);
+      if (!property) {
+        throw new NotFoundException('Property not found');
+      }
+    }
 
     const investments = await this.investmentModel
       .find({ propertyId: property._id })

@@ -9,7 +9,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { OfferPaymentPlan } from '../purchase-offer.schema';
+import type { OfferPaymentPlan } from '../purchase-offer.schema';
 
 export class CreatePurchaseOfferDto {
   @IsMongoId()
