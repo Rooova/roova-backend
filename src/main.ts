@@ -11,7 +11,8 @@ const DEV_SESSION_SECRET = 'dev-secret-change-me';
 async function bootstrap() {
   if (
     process.env.NODE_ENV === 'production' &&
-    (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === DEV_SESSION_SECRET)
+    (!process.env.SESSION_SECRET ||
+      process.env.SESSION_SECRET === DEV_SESSION_SECRET)
   ) {
     throw new Error(
       'SESSION_SECRET must be set to a real random value in production — refusing to start with the dev default.',
