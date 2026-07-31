@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { AdminAuthService } from './admin-auth.service';
 import { AdminAuthGuard } from '../../common/guards/admin-auth.guard';
@@ -16,6 +17,7 @@ import {
   regenerateSession,
   destroySession,
 } from '../../common/utils/session.util';
+import { AUTH_THROTTLE } from '../../common/constants/auth-throttle';
 import { LoginDto } from '../dto/login.dto';
 import { ForgotPasswordDto } from '../dto/forgot-password.dto';
 import { ResetPasswordDto } from '../dto/reset-password.dto';
@@ -26,6 +28,7 @@ export class AdminAuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Throttle(AUTH_THROTTLE)
   async login(@Body() dto: LoginDto, @Req() req: Request) {
     const admin = await this.adminAuth.validateCredentials(dto);
     await regenerateSession(req);
@@ -49,6 +52,7 @@ export class AdminAuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
+  @Throttle(AUTH_THROTTLE)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.adminAuth.forgotPassword(dto);
   }

@@ -12,7 +12,7 @@ import {
 import { PropertyService } from './property.service';
 import { AdminAuthGuard } from '../common/guards/admin-auth.guard';
 import { CurrentSession } from '../common/decorators/current-session.decorator';
-import type { PropertyStatus } from './property.schema';
+import { AdminPropertiesQueryDto } from './dto/admin-properties-query.dto';
 import { RejectPropertyDto } from './dto/reject-property.dto';
 
 @Controller('admin/properties')
@@ -21,8 +21,8 @@ export class AdminPropertyController {
   constructor(private readonly properties: PropertyService) {}
 
   @Get()
-  async findAll(@Query('status') status?: PropertyStatus) {
-    return this.properties.findAllForAdmin(status);
+  async findAll(@Query() query: AdminPropertiesQueryDto) {
+    return this.properties.findAllForAdmin(query.status);
   }
 
   @Post(':id/approve')
